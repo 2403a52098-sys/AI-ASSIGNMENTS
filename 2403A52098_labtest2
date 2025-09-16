@@ -1,0 +1,491 @@
+{
+  "nbformat": 4,
+  "nbformat_minor": 0,
+  "metadata": {
+    "colab": {
+      "provenance": [],
+      "authorship_tag": "ABX9TyN2d8nsKz3aKJFhlwJID5hE",
+      "include_colab_link": true
+    },
+    "kernelspec": {
+      "name": "python3",
+      "display_name": "Python 3"
+    },
+    "language_info": {
+      "name": "python"
+    }
+  },
+  "cells": [
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "view-in-github",
+        "colab_type": "text"
+      },
+      "source": [
+        "<a href=\"https://colab.research.google.com/github/2403a52098-sys/AI-ASSIGNMENTS/blob/main/2403A52098_labtest2\" target=\"_parent\"><img src=\"https://colab.research.google.com/assets/colab-badge.svg\" alt=\"Open In Colab\"/></a>"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": null,
+      "metadata": {
+        "id": "mcSpiGh_xpRw"
+      },
+      "outputs": [],
+      "source": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "4a756218"
+      },
+      "source": [
+        "# Task\n",
+        "Implement inner and left joins on two CSV datasets based on a common 'id' column, without using the pandas library. The implementation should follow SQL semantics for inner and left joins. Include unit tests to verify the correctness of both join types using the provided sample input and expected output. The output order should be stable."
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "2358f09d"
+      },
+      "source": [
+        "## Load data\n",
+        "\n",
+        "### Subtask:\n",
+        "Implement functions to read data from the two CSV strings into suitable in-memory data structures (e.g., lists of dictionaries or tuples).\n"
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "2ff3fdc1"
+      },
+      "source": [
+        "**Reasoning**:\n",
+        "Implement the `load_csv_data` function to parse the CSV strings and load the data into lists of dictionaries, then call the function with the provided sample CSV strings.\n",
+        "\n"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "61f11ead",
+        "outputId": "12c032ca-73d0-4fe8-beb2-7c4dd3f44479"
+      },
+      "source": [
+        "def load_csv_data(csv_string):\n",
+        "    \"\"\"\n",
+        "    Loads CSV data from a string into a list of dictionaries.\n",
+        "\n",
+        "    Args:\n",
+        "        csv_string: A string containing the CSV data.\n",
+        "\n",
+        "    Returns:\n",
+        "        A list of dictionaries, where each dictionary represents a row.\n",
+        "    \"\"\"\n",
+        "    lines = csv_string.strip().split('\\n')\n",
+        "    if not lines:\n",
+        "        return []\n",
+        "\n",
+        "    headers = [header.strip() for header in lines[0].split(',')]\n",
+        "    data = []\n",
+        "    for line in lines[1:]:\n",
+        "        if not line.strip():\n",
+        "            continue\n",
+        "        values = [value.strip() for value in line.split(',')]\n",
+        "        if len(values) == len(headers):\n",
+        "            row = dict(zip(headers, values))\n",
+        "            data.append(row)\n",
+        "        else:\n",
+        "            # Basic error handling for lines with incorrect number of columns\n",
+        "            print(f\"Skipping malformed line: {line}\")\n",
+        "\n",
+        "    return data\n",
+        "\n",
+        "csv_data_1 = \"\"\"id,name,age\n",
+        "1,Alice,30\n",
+        "2,Bob,25\n",
+        "3,Charlie,35\n",
+        "4,David,28\"\"\"\n",
+        "\n",
+        "csv_data_2 = \"\"\"id,city,country\n",
+        "1,New York,USA\n",
+        "3,London,UK\n",
+        "5,Paris,France\"\"\"\n",
+        "\n",
+        "data1 = load_csv_data(csv_data_1)\n",
+        "data2 = load_csv_data(csv_data_2)\n",
+        "\n",
+        "print(\"Data from csv_data_1:\")\n",
+        "for row in data1:\n",
+        "    print(row)\n",
+        "\n",
+        "print(\"\\nData from csv_data_2:\")\n",
+        "for row in data2:\n",
+        "    print(row)"
+      ],
+      "execution_count": 1,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "Data from csv_data_1:\n",
+            "{'id': '1', 'name': 'Alice', 'age': '30'}\n",
+            "{'id': '2', 'name': 'Bob', 'age': '25'}\n",
+            "{'id': '3', 'name': 'Charlie', 'age': '35'}\n",
+            "{'id': '4', 'name': 'David', 'age': '28'}\n",
+            "\n",
+            "Data from csv_data_2:\n",
+            "{'id': '1', 'city': 'New York', 'country': 'USA'}\n",
+            "{'id': '3', 'city': 'London', 'country': 'UK'}\n",
+            "{'id': '5', 'city': 'Paris', 'country': 'France'}\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "10b6ac81"
+      },
+      "source": [
+        "## Implement inner join\n",
+        "\n",
+        "### Subtask:\n",
+        "Write a function that performs an inner join on the two datasets based on the 'id' column, following SQL semantics.\n"
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "e31c6bf5"
+      },
+      "source": [
+        "**Reasoning**:\n",
+        "Implement the `inner_join` function as described in the instructions.\n",
+        "\n"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "5c508cda",
+        "outputId": "daa7e386-a95d-4a09-aebd-97563b668fd0"
+      },
+      "source": [
+        "def inner_join(data1, data2, join_key):\n",
+        "    \"\"\"\n",
+        "    Performs an inner join on two lists of dictionaries based on a join key.\n",
+        "\n",
+        "    Args:\n",
+        "        data1: The first list of dictionaries.\n",
+        "        data2: The second list of dictionaries.\n",
+        "        join_key: The key to join on.\n",
+        "\n",
+        "    Returns:\n",
+        "        A list of dictionaries representing the result of the inner join.\n",
+        "    \"\"\"\n",
+        "    joined_data = []\n",
+        "    for row1 in data1:\n",
+        "        for row2 in data2:\n",
+        "            if row1.get(join_key) == row2.get(join_key) and row1.get(join_key) is not None:\n",
+        "                merged_row = row1.copy()\n",
+        "                for key, value in row2.items():\n",
+        "                    if key != join_key:\n",
+        "                        merged_row[key] = value\n",
+        "                joined_data.append(merged_row)\n",
+        "    return joined_data\n",
+        "\n",
+        "inner_joined_data = inner_join(data1, data2, 'id')\n",
+        "print(\"Inner Join Result:\")\n",
+        "for row in inner_joined_data:\n",
+        "    print(row)"
+      ],
+      "execution_count": 2,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "Inner Join Result:\n",
+            "{'id': '1', 'name': 'Alice', 'age': '30', 'city': 'New York', 'country': 'USA'}\n",
+            "{'id': '3', 'name': 'Charlie', 'age': '35', 'city': 'London', 'country': 'UK'}\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "7d7c2736"
+      },
+      "source": [
+        "## Implement left join\n",
+        "\n",
+        "### Subtask:\n",
+        "Write a function that performs a left join on the two datasets based on the 'id' column, following SQL semantics.\n"
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "fff95434"
+      },
+      "source": [
+        "**Reasoning**:\n",
+        "Implement the `left_join` function as described in the instructions, then call it with the loaded data and print the result.\n",
+        "\n"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "3a3f6b73",
+        "outputId": "d2429672-2567-44c4-c681-20fd7888f980"
+      },
+      "source": [
+        "def left_join(data1, data2, join_key):\n",
+        "    \"\"\"\n",
+        "    Performs a left join on two lists of dictionaries based on a join key.\n",
+        "\n",
+        "    Args:\n",
+        "        data1: The left list of dictionaries.\n",
+        "        data2: The right list of dictionaries.\n",
+        "        join_key: The key to join on.\n",
+        "\n",
+        "    Returns:\n",
+        "        A list of dictionaries representing the result of the left join.\n",
+        "    \"\"\"\n",
+        "    joined_data = []\n",
+        "    # Get keys from the right dataset to add None values for non-matches\n",
+        "    right_keys = set()\n",
+        "    if data2: # Ensure data2 is not empty before accessing its first element\n",
+        "        right_keys = set(data2[0].keys()) - {join_key}\n",
+        "\n",
+        "    for row1 in data1:\n",
+        "        match_found = False\n",
+        "        for row2 in data2:\n",
+        "            if row1.get(join_key) == row2.get(join_key) and row1.get(join_key) is not None:\n",
+        "                merged_row = row1.copy()\n",
+        "                for key, value in row2.items():\n",
+        "                    if key != join_key:\n",
+        "                        merged_row[key] = value\n",
+        "                joined_data.append(merged_row)\n",
+        "                match_found = True\n",
+        "                # In a left join, we only need the first match from the right table\n",
+        "                break\n",
+        "        if not match_found:\n",
+        "            # If no match is found in data2, include the row from data1\n",
+        "            # and add None for columns from data2 (excluding the join key)\n",
+        "            merged_row = row1.copy()\n",
+        "            for key in right_keys:\n",
+        "                merged_row[key] = None\n",
+        "            joined_data.append(merged_row)\n",
+        "    return joined_data\n",
+        "\n",
+        "left_joined_data = left_join(data1, data2, 'id')\n",
+        "print(\"Left Join Result:\")\n",
+        "for row in left_joined_data:\n",
+        "    print(row)"
+      ],
+      "execution_count": 3,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "Left Join Result:\n",
+            "{'id': '1', 'name': 'Alice', 'age': '30', 'city': 'New York', 'country': 'USA'}\n",
+            "{'id': '2', 'name': 'Bob', 'age': '25', 'city': None, 'country': None}\n",
+            "{'id': '3', 'name': 'Charlie', 'age': '35', 'city': 'London', 'country': 'UK'}\n",
+            "{'id': '4', 'name': 'David', 'age': '28', 'city': None, 'country': None}\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "f77f5f9f"
+      },
+      "source": [
+        "## Write unit tests\n",
+        "\n",
+        "### Subtask:\n",
+        "Create unit tests for both the inner and left join implementations using the provided sample input and expected output.\n"
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "ac81c712"
+      },
+      "source": [
+        "**Reasoning**:\n",
+        "Define the expected outputs for both inner and left joins and import the unittest module.\n",
+        "\n"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "id": "c85a446b"
+      },
+      "source": [
+        "expected_inner_join_output = [\n",
+        "    {'id': '1', 'name': 'Alice', 'age': '30', 'city': 'New York', 'country': 'USA'},\n",
+        "    {'id': '3', 'name': 'Charlie', 'age': '35', 'city': 'London', 'country': 'UK'}\n",
+        "]\n",
+        "\n",
+        "expected_left_join_output = [\n",
+        "    {'id': '1', 'name': 'Alice', 'age': '30', 'city': 'New York', 'country': 'USA'},\n",
+        "    {'id': '2', 'name': 'Bob', 'age': '25', 'city': None, 'country': None},\n",
+        "    {'id': '3', 'name': 'Charlie', 'age': '35', 'city': 'London', 'country': 'UK'},\n",
+        "    {'id': '4', 'name': 'David', 'age': '28', 'city': None, 'country': None}\n",
+        "]\n",
+        "\n",
+        "import unittest"
+      ],
+      "execution_count": 4,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "0279bcd2"
+      },
+      "source": [
+        "**Reasoning**:\n",
+        "Create a test class with test methods for both inner and left joins and run the tests.\n",
+        "\n"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "ef285641",
+        "outputId": "cbf8f787-1f9d-423b-b153-25be833346d4"
+      },
+      "source": [
+        "class TestJoinFunctions(unittest.TestCase):\n",
+        "\n",
+        "    def test_inner_join(self):\n",
+        "        \"\"\"Tests the inner_join function.\"\"\"\n",
+        "        result = inner_join(data1, data2, 'id')\n",
+        "        self.assertEqual(result, expected_inner_join_output)\n",
+        "\n",
+        "    def test_left_join(self):\n",
+        "        \"\"\"Tests the left_join function.\"\"\"\n",
+        "        result = left_join(data1, data2, 'id')\n",
+        "        self.assertEqual(result, expected_left_join_output)\n",
+        "\n",
+        "# Run the tests\n",
+        "if __name__ == '__main__':\n",
+        "    unittest.main(argv=['first-arg-is-ignored'], exit=False)"
+      ],
+      "execution_count": 5,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stderr",
+          "text": [
+            "..\n",
+            "----------------------------------------------------------------------\n",
+            "Ran 2 tests in 0.002s\n",
+            "\n",
+            "OK\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "de419550"
+      },
+      "source": [
+        "## Execute and verify\n",
+        "\n",
+        "### Subtask:\n",
+        "Run the unit tests to verify the correctness of the join functions.\n"
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "146360c8"
+      },
+      "source": [
+        "**Reasoning**:\n",
+        "Execute the unit tests defined in the previous step to verify the correctness of the join functions.\n",
+        "\n"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "c1ecd469",
+        "outputId": "44992a17-3e7e-4d83-bbd3-58852d1a14a4"
+      },
+      "source": [
+        "# Run the tests\n",
+        "if __name__ == '__main__':\n",
+        "    unittest.main(argv=['first-arg-is-ignored'], exit=False)"
+      ],
+      "execution_count": 6,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stderr",
+          "text": [
+            "..\n",
+            "----------------------------------------------------------------------\n",
+            "Ran 2 tests in 0.002s\n",
+            "\n",
+            "OK\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "def8d33b"
+      },
+      "source": [
+        "## Summary:\n",
+        "\n",
+        "### Data Analysis Key Findings\n",
+        "\n",
+        "*   The `load_csv_data` function successfully loaded CSV data from strings into lists of dictionaries, with headers correctly used as keys.\n",
+        "*   The `inner_join` function correctly performed an inner join on the two datasets based on the 'id' column, merging matching rows. The resulting inner joined dataset contains two rows.\n",
+        "*   The `left_join` function correctly performed a left join, including all rows from the left dataset (`data1`). Rows from `data1` with no match in `data2` have `None` values for columns originating from `data2`. The resulting left joined dataset contains four rows.\n",
+        "*   Unit tests were implemented for both `inner_join` and `left_join` functions using `unittest`, comparing the output against predefined expected results.\n",
+        "*   The unit tests executed successfully, confirming that both join implementations produced the expected output for the sample data.\n",
+        "\n",
+        "### Insights or Next Steps\n",
+        "\n",
+        "*   The implemented functions provide a foundation for performing basic data joins without relying on external libraries like pandas.\n",
+        "*   Further development could involve implementing other join types (e.g., right join, full outer join) and adding more robust error handling for various data inconsistencies.\n"
+      ]
+    }
+  ]
+}
