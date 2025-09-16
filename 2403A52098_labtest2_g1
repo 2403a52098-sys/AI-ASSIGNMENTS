@@ -1,0 +1,266 @@
+{
+  "nbformat": 4,
+  "nbformat_minor": 0,
+  "metadata": {
+    "colab": {
+      "provenance": [],
+      "authorship_tag": "ABX9TyMqtqhrUtMl+DW61Ndhz417",
+      "include_colab_link": true
+    },
+    "kernelspec": {
+      "name": "python3",
+      "display_name": "Python 3"
+    },
+    "language_info": {
+      "name": "python"
+    }
+  },
+  "cells": [
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "view-in-github",
+        "colab_type": "text"
+      },
+      "source": [
+        "<a href=\"https://colab.research.google.com/github/2403a52098-sys/AI-ASSIGNMENTS/blob/main/2403A52098_labtest2_g1\" target=\"_parent\"><img src=\"https://colab.research.google.com/assets/colab-badge.svg\" alt=\"Open In Colab\"/></a>"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": null,
+      "metadata": {
+        "id": "8nA3Fc9Ardji"
+      },
+      "outputs": [],
+      "source": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "e7be37c8"
+      },
+      "source": [
+        "# Task\n",
+        "Sum the 'value' column in the file \"data.csv\" as int, skipping invalid rows, and report total."
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "28c6748c"
+      },
+      "source": [
+        "## Create a dummy csv file\n",
+        "\n",
+        "### Subtask:\n",
+        "Create a dummy CSV file with the provided sample data to simulate the scenario.\n"
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "56fb5963"
+      },
+      "source": [
+        "**Reasoning**:\n",
+        "Create a dummy CSV file with the provided sample data.\n",
+        "\n"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "id": "a5d44234"
+      },
+      "source": [
+        "csv_data = \"id,value\\n1,10\\n2,20\\n3,invalid\\n4,30\\n5,40.5\"\n",
+        "with open(\"data.csv\", \"w\") as f:\n",
+        "    f.write(csv_data)"
+      ],
+      "execution_count": 1,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "0a460aa0"
+      },
+      "source": [
+        "## Read the csv and process rows\n",
+        "\n",
+        "### Subtask:\n",
+        "Read the CSV file line by line, skipping the header. For each row, attempt to extract and convert the 'value' to an integer. Handle potential errors during conversion.\n"
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "f6d24ca5"
+      },
+      "source": [
+        "**Reasoning**:\n",
+        "Read the CSV file line by line, skip the header, and process each row to extract and convert the 'value' to an integer, handling potential errors.\n",
+        "\n"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "5e0ecb28",
+        "outputId": "8711ae29-a5fe-4b47-d7f4-ac6d317ac90a"
+      },
+      "source": [
+        "valid_values = []\n",
+        "skipped_rows_count = 0\n",
+        "\n",
+        "with open(\"data.csv\", \"r\") as f:\n",
+        "    # Skip the header\n",
+        "    next(f)\n",
+        "    for line in f:\n",
+        "        line = line.strip()\n",
+        "        if not line:\n",
+        "            continue  # Skip empty lines\n",
+        "        id_str, value_str = line.split(',')\n",
+        "        try:\n",
+        "            value = int(value_str)\n",
+        "            valid_values.append(value)\n",
+        "        except ValueError:\n",
+        "            skipped_rows_count += 1\n",
+        "\n",
+        "print(f\"Valid values extracted: {valid_values}\")\n",
+        "print(f\"Skipped rows count: {skipped_rows_count}\")"
+      ],
+      "execution_count": 2,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "Valid values extracted: [10, 20, 30]\n",
+            "Skipped rows count: 2\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "5102ba5f"
+      },
+      "source": [
+        "## Sum valid values and count skipped rows\n",
+        "\n",
+        "### Subtask:\n",
+        "Accumulate the sum of valid integer values and maintain a count of rows that could not be processed due to invalid 'value'.\n"
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "5829a37b"
+      },
+      "source": [
+        "**Reasoning**:\n",
+        "Calculate the sum of the valid values and print the total sum and the count of skipped rows.\n",
+        "\n"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "d70d6bdc",
+        "outputId": "e00020b3-234e-45bd-ba91-cf6333685a5c"
+      },
+      "source": [
+        "total_sum = sum(valid_values)\n",
+        "print(f\"Total sum of valid values: {total_sum}\")\n",
+        "print(f\"Number of skipped rows: {skipped_rows_count}\")"
+      ],
+      "execution_count": 3,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "Total sum of valid values: 60\n",
+            "Number of skipped rows: 2\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "2634e8a9"
+      },
+      "source": [
+        "## Report results\n",
+        "\n",
+        "### Subtask:\n",
+        "Print the total sum of valid values and the count of skipped rows.\n"
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "b7d61ba2"
+      },
+      "source": [
+        "**Reasoning**:\n",
+        "Print the total sum of valid values and the count of skipped rows as requested.\n",
+        "\n"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "3a898316",
+        "outputId": "ae624de7-0326-49a5-fddb-b866b1e785f8"
+      },
+      "source": [
+        "print(f\"Total sum of valid values: {total_sum}\")\n",
+        "print(f\"Number of skipped rows: {skipped_rows_count}\")"
+      ],
+      "execution_count": 4,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "Total sum of valid values: 60\n",
+            "Number of skipped rows: 2\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "185b328c"
+      },
+      "source": [
+        "## Summary:\n",
+        "\n",
+        "### Data Analysis Key Findings\n",
+        "\n",
+        "*   The total sum of the valid integer values in the 'value' column is 60.\n",
+        "*   A total of 2 rows were skipped due to invalid data in the 'value' column.\n",
+        "\n",
+        "### Insights or Next Steps\n",
+        "\n",
+        "*   Consider adding error handling for potential issues during file opening or reading.\n",
+        "*   For future analysis, log the content of the skipped rows to understand the types of invalid data encountered.\n"
+      ]
+    }
+  ]
+}
